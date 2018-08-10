@@ -1076,12 +1076,20 @@ func (qf QFrame) ToSQL(tx *sql.Tx, confFuncs ...qsql.ConfigFunc) error {
 	if qf.Err != nil {
 		return errors.Propagate("ToSQL", qf.Err)
 	}
+	config := qfsqlio.SQLConfig(qsql.NewConfig(confFuncs))
 	builders := make([]qfsqlio.ArgBuilder, len(qf.columns))
 	var err error
+	// Attempt to create the database table dymaically
+	if config.CreateTable {
+		_, err = tx.Exec(qfsqlio.Create(qf.ColumnNames(), qf.ColumnTypes(), config))
+		if err != nil {
+			return errors.Propagate("ToSQL", err)
+		}
+	}
 	for i, column := range qf.columns {
 		builders[i], err = qfsqlio.NewArgBuilder(column.Column)
 		if err != nil {
-			return errors.New("ToSQL", err.Error())
+			return errors.Propagate("ToSQL", err)
 		}
 	}
 	for i := range qf.index {
@@ -1089,9 +1097,9 @@ func (qf QFrame) ToSQL(tx *sql.Tx, confFuncs ...qsql.ConfigFunc) error {
 		for j, b := range builders {
 			args[j] = b(qf.index, i)
 		}
-		_, err = tx.Exec(qfsqlio.Insert(qf.ColumnNames(), qfsqlio.SQLConfig(qsql.NewConfig(confFuncs))), args...)
+		_, err = tx.Exec(qfsqlio.Insert(qf.ColumnNames(), config), args...)
 		if err != nil {
-			return errors.New("ToSQL", err.Error())
+			return errors.Propagate("ToSQL", err)
 		}
 	}
 	return nil

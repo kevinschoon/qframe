@@ -3,6 +3,8 @@ package sql
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/tobgu/qframe/types"
 )
 
 func escape(s string, char rune, buf *bytes.Buffer) {
@@ -47,6 +49,28 @@ func Insert(colNames []string, conf SQLConfig) string {
 		}
 		if i+1 < len(colNames) {
 			buf.WriteString(",")
+		}
+	}
+	buf.WriteString(");")
+	return buf.String()
+}
+
+// Create generates a SQL CREATE statement suitable for
+// dynamically creating database tables based on QFrames.
+//
+// SQL Types can be optionally naively overwritten by
+// specifying a TypeMap with the SQLConfig.
+func Create(colNames []string, colTypes []types.DataType, conf SQLConfig) string {
+	buf := bytes.NewBuffer(nil)
+	buf.WriteString("CREATE TABLE ")
+	escape(conf.Table, conf.EscapeChar, buf)
+	buf.WriteString(" (")
+	for i, name := range colNames {
+		escape(name, conf.EscapeChar, buf)
+		buf.WriteString(" ")
+		escape(conf.getSQLType(colTypes[i]), conf.EscapeChar, buf)
+		if i+1 < len(colNames) {
+			buf.WriteString(", ")
 		}
 	}
 	buf.WriteString(");")

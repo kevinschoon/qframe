@@ -63,7 +63,7 @@ Load data to and from an in-memory SQLite database. Note
 that this example requires you to have [go-sqlite3](https://github.com/mattn/go-sqlite3) installed
 prior to running.
 
-```
+```go
 package main
 
 import (
@@ -78,14 +78,6 @@ import (
 func main() {
 	// Create a new in-memory SQLite database.
 	db, _ := sql.Open("sqlite3", ":memory:")
-	// Add a new table.
-	db.Exec(`
-	CREATE TABLE test (
-		COL1 INT,
-		COL2 REAL,
-		COL3 TEXT,
-		COL4 BOOL
-	);`)
 	// Create a new QFrame to populate our table with.
 	qf := qframe.New(map[string]interface{}{
 		"COL1": []int{1, 2, 3},
@@ -97,15 +89,17 @@ func main() {
 	// Start a new SQL Transaction.
 	tx, _ := db.Begin()
 	// Write the QFrame to the database.
-	qf.ToSQL(tx,
-		// Write only to the test table
+	fmt.Println(qf.ToSQL(tx,
+		// Write only to the test table.
 		qsql.Table("test"),
+		// Create the table before writing.
+		qsql.CreateTable(true),
 		// Explicitly set SQLite compatibility.
 		qsql.SQLite(),
-	)
+	))
 	// Create a new QFrame from SQL.
 	newQf := qframe.ReadSQL(tx,
-		// A query must return at least one column. In this 
+		// A query must return at least one column. In this
 		// case it will return all of the columns we created above.
 		qsql.Query("SELECT * FROM test"),
 		// SQLite stores boolean values as integers, so we

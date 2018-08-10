@@ -2,6 +2,7 @@ package sql
 
 import (
 	qsqlio "github.com/tobgu/qframe/internal/io/sql"
+	"github.com/tobgu/qframe/types"
 )
 
 type coerceType int
@@ -37,6 +38,16 @@ type ConfigFunc func(*Config)
 // NewConfig creates a new config object.
 func NewConfig(ff []ConfigFunc) Config {
 	conf := Config{}
+	// defaults
+	TypeMap(
+		map[types.DataType]string{
+			types.Int:    "INT",
+			types.Enum:   "TEXT",
+			types.String: "TEXT",
+			types.Float:  "FLOAT",
+			types.Bool:   "BOOL",
+		},
+	)(&conf)
 	for _, f := range ff {
 		f(&conf)
 	}
@@ -123,5 +134,21 @@ func Coerce(pairs ...CoercePair) ConfigFunc {
 func Precision(i int) ConfigFunc {
 	return func(c *Config) {
 		c.Precision = i
+	}
+}
+
+// TypeMap specifies a mapping of QFrame DataType to a string
+// representation of a SQL type.
+func TypeMap(typeMap map[types.DataType]string) ConfigFunc {
+	return func(c *Config) {
+		c.TypeMap = typeMap
+	}
+}
+
+// CreateTable will attempt to create a database table by generating
+// a SQL CREATE statement based on the column name and types of a QFrame.
+func CreateTable(value bool) ConfigFunc {
+	return func(c *Config) {
+		c.CreateTable = value
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/tobgu/qframe/internal/icolumn"
 	"github.com/tobgu/qframe/internal/index"
 	"github.com/tobgu/qframe/internal/scolumn"
+	"github.com/tobgu/qframe/types"
 )
 
 type SQLConfig struct {
@@ -37,6 +38,19 @@ type SQLConfig struct {
 	// Precision specifies how much precision float values
 	// should have. 0 has no effect.
 	Precision int
+	// TypeMap specifies a mapping of QFrame DataType to a string
+	// representation of a SQL type.
+	TypeMap map[types.DataType]string
+	// CreateTable will attempt to create a database table by generating
+	// a SQL CREATE statement based on the column name and types of a QFrame.
+	CreateTable bool
+}
+
+func (c SQLConfig) getSQLType(dt types.DataType) string {
+	if sqlType, ok := c.TypeMap[dt]; ok {
+		return sqlType
+	}
+	panic(errors.New("getSQLType", "no SQL datatype for %s, did we forget to add a new column?", dt))
 }
 
 type ArgBuilder func(ix index.Int, i int) interface{}
