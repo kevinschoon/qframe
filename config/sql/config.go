@@ -145,10 +145,19 @@ func TypeMap(typeMap map[types.DataType]string) ConfigFunc {
 	}
 }
 
-// CreateTable will attempt to create a database table by generating
+// Create will attempt to create a database table by generating
 // a SQL CREATE statement based on the column name and types of a QFrame.
-func CreateTable(value bool) ConfigFunc {
+func Create(value bool) ConfigFunc {
 	return func(c *Config) {
-		c.CreateTable = value
+		c.Create = value
+	}
+}
+
+// Clobber will attempt to drop a database table prior to
+// inserting any data. It should usually be used with the
+// Create option.
+func Clobber(value bool) ConfigFunc {
+	return func(c *Config) {
+		c.Clobber = value
 	}
 }

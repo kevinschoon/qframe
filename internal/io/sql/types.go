@@ -41,9 +41,13 @@ type SQLConfig struct {
 	// TypeMap specifies a mapping of QFrame DataType to a string
 	// representation of a SQL type.
 	TypeMap map[types.DataType]string
-	// CreateTable will attempt to create a database table by generating
+	// Create will attempt to create a database table by generating
 	// a SQL CREATE statement based on the column name and types of a QFrame.
-	CreateTable bool
+	Create bool
+	// Clobber will attempt to drop a database table prior to
+	// inserting any data. It should usually be used with the
+	// Create option.
+	Clobber bool
 }
 
 func (c SQLConfig) getSQLType(dt types.DataType) string {

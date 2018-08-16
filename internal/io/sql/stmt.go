@@ -76,3 +76,13 @@ func Create(colNames []string, colTypes []types.DataType, conf SQLConfig) string
 	buf.WriteString(");")
 	return buf.String()
 }
+
+// Clobber generates a SQL DROP TABLE statement to dynamically
+// drop a table prior to inserting data.
+func Clobber(conf SQLConfig) string {
+	buf := bytes.NewBuffer(nil)
+	buf.WriteString("DROP TABLE ")
+	escape(conf.Table, conf.EscapeChar, buf)
+	buf.WriteString(";")
+	return buf.String()
+}

@@ -1079,8 +1079,20 @@ func (qf QFrame) ToSQL(tx *sql.Tx, confFuncs ...qsql.ConfigFunc) error {
 	config := qfsqlio.SQLConfig(qsql.NewConfig(confFuncs))
 	builders := make([]qfsqlio.ArgBuilder, len(qf.columns))
 	var err error
+	// Attempt to delete any existing table prior to creation
+	if config.Clobber {
+		_, err = tx.Exec(qfsqlio.Clobber(config))
+		if err != nil {
+			// Ensure that we only ignore an
+			// error caused by a missing table
+			if !qfsqlio.IsTableNotFound(err) {
+				// Something else went wrong
+				return err
+			}
+		}
+	}
 	// Attempt to create the database table dymaically
-	if config.CreateTable {
+	if config.Create {
 		_, err = tx.Exec(qfsqlio.Create(qf.ColumnNames(), qf.ColumnTypes(), config))
 		if err != nil {
 			return errors.Propagate("ToSQL", err)
