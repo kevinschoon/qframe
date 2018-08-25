@@ -54,7 +54,7 @@ func TestCreate(t *testing.T) {
 			EscapeChar: '"',
 		},
 	)
-	expected = `CREATE TABLE "test" ("COL1" "INT", "COL2" "FLOAT");`
+	expected = `CREATE TABLE "test" ("COL1" INT, "COL2" FLOAT);`
 	assertEqual(t, expected, stmt)
 
 	// Backtick escaped
@@ -70,6 +70,6 @@ func TestCreate(t *testing.T) {
 			EscapeChar: '`',
 		},
 	)
-	expected = "CREATE TABLE `test` (`COL1` `INT`, `COL2` `FLOAT`);"
+	expected = "CREATE TABLE `test` (`COL1` INT, `COL2` FLOAT);"
 	assertEqual(t, expected, stmt)
 }

@@ -68,7 +68,7 @@ func Create(colNames []string, colTypes []types.DataType, conf SQLConfig) string
 	for i, name := range colNames {
 		escape(name, conf.EscapeChar, buf)
 		buf.WriteString(" ")
-		escape(conf.getSQLType(colTypes[i]), conf.EscapeChar, buf)
+		buf.WriteString(conf.getSQLType(colTypes[i]))
 		if i+1 < len(colNames) {
 			buf.WriteString(", ")
 		}
